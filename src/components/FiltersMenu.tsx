@@ -12,7 +12,7 @@ class FiltersMenu extends Component<FiltersMenuProps> {
             <div
                 className={
                     (this.props.filtersOpen ? "open " : "") +
-                    "filters_menu fixed top-0 left-0 w-full h-full z-10 bg-white"
+                    "filters_menu fixed bottom-0 left-0 w-full z-10 bg-white"
                 }
             ></div>
         );

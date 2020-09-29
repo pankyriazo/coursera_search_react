@@ -3,14 +3,16 @@ import "./App.scss";
 import Loader from "./components/Loader";
 import algoliasearch from "algoliasearch";
 import { Course } from "./interfaces/course";
-import { Data } from "./interfaces/data";
 import CourseList from "./components/CourseList";
 import FiltersButton from "./components/FiltersButton";
 import FiltersMenu from "./components/FiltersMenu";
 import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
 import Search from "./components/Search";
+import { of, Subscription } from "rxjs";
+import { tap, switchMap } from "rxjs/operators";
+import CoursesLength from "./components/CoursesLength";
 
-type SearchResults = {
+interface SearchResults {
     hits: Course[];
     nbHits: number;
     facets: {
@@ -19,21 +21,32 @@ type SearchResults = {
         productDifficultyLevel: {};
         skills: {};
     };
-};
+}
 
-type AppState = {
+interface Data {
+    courses: Course[];
+    coursesLength: number;
+    partners: { name: string; courses: number }[];
+    skills: { name: string; courses: number }[];
+    productDifficultyLevel: { name: string; courses: number }[];
+    language: { name: string; courses: number }[];
+}
+
+interface AppState {
     loading: boolean;
     filtersOpen: boolean;
     data: Data;
     searchData: {
         searchActive: boolean;
         courses: Course[];
+        coursesLength: number;
     };
-};
+}
 
 class App extends Component<{}, AppState> {
     filtersRef: RefObject<any>;
     search: Function;
+    searchChangeSubscription: Subscription | undefined;
 
     constructor(props: {}) {
         super(props);
@@ -59,6 +72,7 @@ class App extends Component<{}, AppState> {
             searchData: {
                 searchActive: false,
                 courses: [],
+                coursesLength: 0,
             },
         };
     }
@@ -112,6 +126,10 @@ class App extends Component<{}, AppState> {
             .catch((err: Error) => console.log(err));
     }
 
+    componentWillUnmount() {
+        this.searchChangeSubscription!.unsubscribe();
+    }
+
     toggleFiltersStatus = () => {
         this.setState((state) => {
             (async () => {
@@ -127,47 +145,54 @@ class App extends Component<{}, AppState> {
     };
 
     updateSearch = (value: string) => {
-        if (value === "") {
-            this.setState({
-                searchData: {
-                    searchActive: false,
-                    courses: [],
-                },
-            });
-        } else {
-            this.setState({
-                loading: true,
-            });
-            this.search(value, {
-                restrictSearchableAttributes: [
-                    "name",
-                    "tagline",
-                    "partners",
-                    "skills",
-                ],
-                facets: [
-                    "partners",
-                    "skills",
-                    "language",
-                    "productDifficultyLevel",
-                ],
-                maxValuesPerFacet: 1000,
-                hitsPerPage: 1000,
-            })
-                .then((results: SearchResults) => {
+        this.searchChangeSubscription = of(value)
+            .pipe(
+                switchMap((value) => {
+                    if (value === "") return of(null);
+
                     this.setState({
-                        loading: false,
+                        loading: true,
                     });
-                    this.setState({
-                        searchData: {
-                            searchActive: true,
-                            courses: results.hits,
-                        },
-                        loading: false,
+
+                    return this.search(value, {
+                        restrictSearchableAttributes: [
+                            "name",
+                            "tagline",
+                            "partners",
+                            "skills",
+                        ],
+                        facets: [
+                            "partners",
+                            "skills",
+                            "language",
+                            "productDifficultyLevel",
+                        ],
+                        maxValuesPerFacet: 1000,
+                        hitsPerPage: 1000,
                     });
+                }),
+                tap((results: any) => {
+                    if (!results) {
+                        this.setState({
+                            searchData: {
+                                searchActive: false,
+                                courses: [],
+                                coursesLength: 0,
+                            },
+                        });
+                    } else {
+                        this.setState({
+                            searchData: {
+                                searchActive: true,
+                                courses: results.hits,
+                                coursesLength: results.nbHits,
+                            },
+                            loading: false,
+                        });
+                    }
                 })
-                .catch((err: Error) => console.log(err));
-        }
+            )
+            .subscribe();
     };
 
     render() {
@@ -175,6 +200,13 @@ class App extends Component<{}, AppState> {
             <div className="App flex flex-col overflow-hidden h-screen bg-gray-200">
                 <Loader loading={this.state.loading} />
                 <Search updateSearch={this.updateSearch} />
+                <CoursesLength
+                    length={
+                        this.state.searchData.searchActive
+                            ? this.state.searchData.coursesLength
+                            : this.state.data.coursesLength
+                    }
+                />
                 <CourseList
                     courses={
                         this.state.searchData.searchActive
@@ -183,7 +215,7 @@ class App extends Component<{}, AppState> {
                     }
                     coursesLength={
                         this.state.searchData.searchActive
-                            ? this.state.searchData.courses.length
+                            ? this.state.searchData.coursesLength
                             : this.state.data.coursesLength
                     }
                 />

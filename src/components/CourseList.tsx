@@ -13,39 +13,31 @@ class CourseList extends Component<CourseListsProps> {
     item = ({ index, style }: { index: number; style: any }) => (
         <CourseItem
             course={this.props.courses[index]}
-            key={this.props.courses[index].objectID}
-            style={style}
+            style={{
+                ...style,
+                left: style.left + 8,
+                top: style.top + 8,
+                width: "calc(100% - 1rem)",
+            }}
         />
     );
     render() {
-        return (
+        return this.props.coursesLength > 0 ? (
             <AutoSizer>
                 {({ height, width }) => (
                     <List
-                        className="List pt-2 pb-20 overflow-y-auto"
-                        height={height}
+                        className="List overflow-y-auto pb-20 z-0"
+                        height={height - (56 + 26)}
                         itemCount={this.props.coursesLength}
-                        itemSize={98}
+                        itemSize={106}
                         width={width}
                     >
                         {this.item}
                     </List>
                 )}
             </AutoSizer>
-            /* <ul className="flex flex-col pt-2 pb-20 overflow-y-auto">
-                    {this.props.coursesLength > 0 ? (
-                        this.props.courses
-                            .slice(0, 10)
-                            .map((course) => (
-                                <CourseItem
-                                    course={course}
-                                    key={course.objectID}
-                                />
-                            ))
-                    ) : (
-                        <h2 className="text-center mt-8">No courses found</h2>
-                    )}
-                </ul> */
+        ) : (
+            <h2 className="text-center mt-8">No courses found</h2>
         );
     }
 }

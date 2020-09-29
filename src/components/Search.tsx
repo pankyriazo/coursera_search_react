@@ -33,7 +33,7 @@ class Search extends Component<SearchProps> {
 
     render() {
         return (
-            <div className="search w-full p-2 bg-blue-500">
+            <div className="search w-full p-2 bg-blue-500 z-30">
                 <input
                     ref={this.inputRef}
                     type="text"

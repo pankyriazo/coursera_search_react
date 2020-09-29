@@ -15,7 +15,7 @@ class Loader extends Component<LoaderProps> {
             <div
                 className={
                     (this.props.loading ? "open " : "") +
-                    "loader fixed z-30 top-0 left-0 w-full h-full"
+                    "loader fixed z-50 top-0 left-0 w-full h-full"
                 }
             >
                 <div className="background absolute top-0 left-0 w-full h-full bg-gray-200"></div>

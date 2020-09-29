@@ -8,7 +8,7 @@ type CourseItemProps = {
 };
 
 const CourseItem = (props: CourseItemProps) => (
-    <div className="m-2 mt-0" style={props.style}>
+    <div style={props.style}>
         <a
             href={"https://www.coursera.org" + props.course.objectUrl}
             title={props.course.name}
@@ -19,8 +19,8 @@ const CourseItem = (props: CourseItemProps) => (
             <div className="text-lg font-semibold text-black truncate">
                 {props.course.name}
             </div>
-            <div className="text-sm my-1 text-red-500 font-semibold">
-                {props.course.partners}
+            <div className="text-sm my-1 text-red-500 font-semibold truncate">
+                {props.course.partners.join(" | ")}
             </div>
             <div
                 className={
