@@ -1,13 +1,18 @@
 .loader {
     visibility: hidden;
     opacity: 0;
-    transition: all 0.15s cubic-bezier(0.2, 0, 0, 1);
+    transition: all 0.15s ease-in-out;
 
-    &.visible {
+    &.open {
         visibility: visible;
         opacity: 1;
     }
 }
+
+.background {
+    opacity: 0.9;
+}
+
 .spinner {
     border-bottom-color: transparent;
     border-left-color: transparent;

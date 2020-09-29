@@ -1,0 +1,11 @@
+.course_type {
+    &.professional_certificate {
+        color: #4c51bf;
+    }
+    &.specialization {
+        color: #319795;
+    }
+    &.course {
+        color: #3182ce;
+    }
+}

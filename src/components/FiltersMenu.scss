@@ -1,0 +1,12 @@
+.filters_menu {
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(50%);
+    transition: all 0.15s ease-in-out;
+
+    &.open {
+        visibility: visible;
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
