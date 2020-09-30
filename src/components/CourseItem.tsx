@@ -1,5 +1,5 @@
 import React from "react";
-import { Course } from "../interfaces/course";
+import { Course } from "../types/course";
 import "./CourseItem.scss";
 
 type CourseItemProps = {

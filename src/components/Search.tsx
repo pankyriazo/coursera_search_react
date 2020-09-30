@@ -1,14 +1,34 @@
 import React, { Component, RefObject } from "react";
-import { fromEvent, Subscription } from "rxjs";
-import { debounceTime, distinctUntilChanged, map, tap } from "rxjs/operators";
+import { fromEvent, Subscription, from, of } from "rxjs";
+import {
+    debounceTime,
+    distinctUntilChanged,
+    map,
+    tap,
+    switchMap,
+} from "rxjs/operators";
+import algoliasearch from "algoliasearch";
+import { Course } from "../types/course";
+import { SearchResponse } from "@algolia/client-search";
 
 type SearchProps = {
-    updateSearch: Function;
+    searchSetState: ({
+        courses,
+        coursesNum,
+        loading,
+        reset,
+    }: {
+        courses?: Course[];
+        coursesNum?: number;
+        loading?: boolean;
+        reset?: boolean;
+    }) => void;
 };
 
 class Search extends Component<SearchProps> {
     inputRef: RefObject<HTMLInputElement>;
     inputSubscription: Subscription | undefined;
+    searchSubscription: Subscription | undefined;
 
     constructor(props: SearchProps) {
         super(props);
@@ -22,7 +42,48 @@ class Search extends Component<SearchProps> {
                 map((event: Event) => (event.target as HTMLInputElement).value),
                 debounceTime(500),
                 distinctUntilChanged(),
-                tap((value) => this.props.updateSearch(value))
+                switchMap((value: string) => {
+                    if (value === "") return of(null);
+
+                    this.props.searchSetState({ loading: true });
+
+                    return from(
+                        algoliasearch(
+                            process.env.REACT_APP_ALGOLIA_APP_ID!,
+                            process.env.REACT_APP_ALGOLIA_API_KEY!
+                        )
+                            .initIndex("prod_all_products")
+                            .search(value, {
+                                restrictSearchableAttributes: [
+                                    "name",
+                                    "tagline",
+                                    "partners",
+                                    "skills",
+                                ],
+                                facets: [
+                                    "partners",
+                                    "skills",
+                                    "language",
+                                    "productDifficultyLevel",
+                                ],
+                                maxValuesPerFacet: 1000,
+                                hitsPerPage: 1000,
+                            })
+                    );
+                }),
+                tap((results: SearchResponse<unknown> | null) => {
+                    if (!results) {
+                        this.props.searchSetState({
+                            reset: true,
+                        });
+                    } else {
+                        this.props.searchSetState({
+                            courses: results.hits as Course[],
+                            coursesNum: results.nbHits,
+                            loading: false,
+                        });
+                    }
+                })
             )
             .subscribe();
     }

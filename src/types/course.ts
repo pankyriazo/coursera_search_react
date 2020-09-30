@@ -1,9 +1,15 @@
-export interface Course {
+export type Course = {
     allLanguageCodes: string[];
     avgLearningHours: number;
     avgProductRating: number;
     enrollments: number;
-    entityType: "PROFESSIONAL CERTIFICATE" | "SPECIALIZATION" | "COURSE";
+    entityType:
+        | "PROFESSIONAL CERTIFICATE"
+        | "DEGREE"
+        | "MASTERTRACK"
+        | "RHYME PROJECT"
+        | "SPECIALIZATION"
+        | "COURSE";
     imageUrl: string;
     isCourseFree: boolean;
     isPartOfCourseraPlus: boolean;
@@ -18,4 +24,4 @@ export interface Course {
     skills: string[];
     subtitleLanguage: string[];
     tagline: string;
-}
+};

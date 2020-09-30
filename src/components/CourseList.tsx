@@ -1,12 +1,12 @@
 import React, { Component } from "react";
-import { Course } from "../interfaces/course";
+import { Course } from "../types/course";
 import CourseItem from "./CourseItem";
 import { FixedSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 
 type CourseListsProps = {
     courses: Course[];
-    coursesLength: number;
+    coursesNum: number;
 };
 
 class CourseList extends Component<CourseListsProps> {
@@ -22,13 +22,13 @@ class CourseList extends Component<CourseListsProps> {
         />
     );
     render() {
-        return this.props.coursesLength > 0 ? (
+        return this.props.coursesNum > 0 ? (
             <AutoSizer>
                 {({ height, width }) => (
                     <List
                         className="List overflow-y-auto pb-20 z-0"
                         height={height - (56 + 26)}
-                        itemCount={this.props.coursesLength}
+                        itemCount={this.props.coursesNum}
                         itemSize={106}
                         width={width}
                     >
