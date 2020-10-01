@@ -1,6 +1,7 @@
 import React from "react";
 import { Course } from "../types/course";
 import "./CourseItem.scss";
+import toCamelcase from "../utilities/toCamelcase";
 
 type CourseItemProps = {
     course: Course;
@@ -28,19 +29,7 @@ const CourseItem = (props: CourseItemProps) => (
                     props.course.entityType.toLowerCase().replace(" ", "_")
                 }
             >
-                {props.course.entityType
-                    .split(" ")
-                    .map((word) =>
-                        word
-                            .split("")
-                            .map((letter, index) =>
-                                index === 0
-                                    ? letter.toUpperCase()
-                                    : letter.toLowerCase()
-                            )
-                            .join("")
-                    )
-                    .join(" ")}
+                {toCamelcase(props.course.entityType)}
             </div>
         </a>
     </div>

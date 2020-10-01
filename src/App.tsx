@@ -1,28 +1,32 @@
 import React, { Component } from "react";
 import "./App.scss";
 import Loader from "./components/Loader";
-import algoliasearch from "algoliasearch";
 import { Course } from "./types/course";
 import CourseList from "./components/CourseList";
 import FiltersButton from "./components/FiltersButton";
 import FiltersMenu from "./components/FiltersMenu";
 import Search from "./components/Search";
-import { from } from "rxjs";
-import { tap, take } from "rxjs/operators";
+import search from "./utilities/search";
 import CoursesNum from "./components/CoursesNum";
-import { SearchResponse } from "@algolia/client-search";
+import { tap, take } from "rxjs/operators";
+import { Filter } from "./types/filter";
+import { of } from "rxjs";
 
 type AllData = {
     courses: Course[];
     coursesNum: number;
     partners: { name: string; courses: number }[];
     skills: { name: string; courses: number }[];
-    productDifficultyLevels: { name: string; courses: number }[];
+    productDifficultyLevel: { name: string; courses: number }[];
     language: { name: string; courses: number }[];
-};
-
-type SearchOptions = {
-    query: string;
+    careers: { name: string; courses: number }[];
+    entityType: { name: string; courses: number }[];
+    isPartOfCourseraPlus: { name: string; courses: number }[];
+    subtitleLanguage: { name: string; courses: number }[];
+    topic: { name: string; courses: number }[];
+    enrollments: { min: number; max: number };
+    avgLearningHours: { min: number; max: number };
+    numProductRatings: { min: number; max: number };
 };
 
 type AppState = {
@@ -30,12 +34,9 @@ type AppState = {
     filtersMenuIsOpen: boolean;
     courses: Course[];
     coursesNum: number;
-
-    // In the case the user searches for a value and then applies additional filters.
-    // If then the filters are removed, the courses must return to the ones limited to the search value and not to the allData ones.
     search: {
-        courses: Course[];
-        coursesNum: number;
+        query: string;
+        filters: Filter[];
     };
 };
 
@@ -50,18 +51,26 @@ class App extends Component<{}, AppState> {
             coursesNum: 0,
             partners: [],
             skills: [],
-            productDifficultyLevels: [],
+            productDifficultyLevel: [],
             language: [],
+            careers: [],
+            entityType: [],
+            isPartOfCourseraPlus: [],
+            subtitleLanguage: [],
+            topic: [],
+            enrollments: { min: 0, max: 0 },
+            avgLearningHours: { min: 0, max: 0 },
+            numProductRatings: { min: 0, max: 0 },
         };
 
         this.state = {
             loading: true,
-            filtersMenuIsOpen: false,
+            filtersMenuIsOpen: true,
             courses: [],
             coursesNum: 0,
             search: {
-                courses: [],
-                coursesNum: 0,
+                query: "",
+                filters: [],
             },
         };
     }
@@ -71,64 +80,87 @@ class App extends Component<{}, AppState> {
     }
 
     getAllData = (): void => {
-        from(
-            algoliasearch(
-                process.env.REACT_APP_ALGOLIA_APP_ID!,
-                process.env.REACT_APP_ALGOLIA_API_KEY!
-            )
-                .initIndex("prod_all_products")
-                .search("", {
-                    facets: ["*"],
-                    // facets: [
-                    //     "partners",
-                    //     "skills",
-                    //     "language",
-                    //     "productDifficultyLevel",
-                    //     "isCourseFree",
-                    // ],
-                    // filters: `isCourseFree:true`,
-                    // numericFilters: [
-                    //     "avgProductRating > 4.95",
-                    //     "numProductRatings > 100",
-                    // ],
-                    maxValuesPerFacet: 1000,
-                    hitsPerPage: 1000,
-                })
-        )
+        search("", [], ["*"])
             .pipe(
                 take(1),
-                tap((results: SearchResponse<unknown>) => {
-                    console.log(results);
-                    this.allData = {
-                        courses: results.hits as Course[],
-                        coursesNum: results.nbHits,
-                        partners: Object.keys(results.facets!.partners).map(
-                            (name) => ({
-                                name,
-                                courses: results.facets!.partners[name],
-                            })
-                        ),
-                        skills: Object.keys(results.facets!.skills).map(
-                            (name) => ({
-                                name,
-                                courses: results.facets!.skills[name],
-                            })
-                        ),
-                        productDifficultyLevels: Object.keys(
-                            results.facets!.productDifficultyLevel
+                tap((results) => {
+                    this.allData.courses = results.hits as Course[];
+                    this.allData.coursesNum = results.nbHits;
+                    [
+                        "partners",
+                        "skills",
+                        "productDifficultyLevel",
+                        "language",
+                        "careers",
+                        "entityType",
+                        "isPartOfCourseraPlus",
+                        "subtitleLanguage",
+                        "topic",
+                    ].forEach((facet) => {
+                        if (!results.facets || !results.facets![facet]) return;
+
+                        this.allData[facet] = Object.keys(
+                            results.facets![facet]
                         ).map((name) => ({
                             name,
-                            courses: results.facets!.productDifficultyLevel[
-                                name
-                            ],
-                        })),
-                        language: Object.keys(results.facets!.language).map(
-                            (name) => ({
-                                name,
-                                courses: results.facets!.language[name],
-                            })
-                        ),
-                    };
+                            courses: results.facets![facet][name],
+                        }));
+                    });
+
+                    if (results.facets && results.facets.enrollments) {
+                        of(
+                            Object.keys(results.facets.enrollments).map(
+                                (enrollment: string) => +enrollment
+                            )
+                        )
+                            .pipe(
+                                take(1),
+                                tap((enrollments) => {
+                                    this.allData.enrollments = {
+                                        max: Math.max(...enrollments),
+                                        min: Math.min(...enrollments),
+                                    };
+                                })
+                            )
+                            .subscribe();
+                    }
+
+                    if (results.facets && results.facets.avgLearningHours) {
+                        of(
+                            Object.keys(results.facets.avgLearningHours).map(
+                                (enrollment: string) => +enrollment
+                            )
+                        )
+                            .pipe(
+                                take(1),
+                                tap((avgLearningHours) => {
+                                    this.allData.avgLearningHours = {
+                                        max: Math.max(...avgLearningHours),
+                                        min: Math.min(...avgLearningHours),
+                                    };
+                                })
+                            )
+                            .subscribe();
+                    }
+
+                    if (results.facets && results.facets.numProductRatings) {
+                        of(
+                            Object.keys(results.facets.numProductRatings).map(
+                                (enrollment: string) => +enrollment
+                            )
+                        )
+                            .pipe(
+                                take(1),
+                                tap((numProductRatings) => {
+                                    this.allData.numProductRatings = {
+                                        max: Math.max(...numProductRatings),
+                                        min: Math.min(...numProductRatings),
+                                    };
+                                })
+                            )
+                            .subscribe();
+                    }
+
                     this.setState({
                         loading: false,
                         courses: this.allData.courses,
@@ -140,11 +172,13 @@ class App extends Component<{}, AppState> {
     };
 
     searchSetState = ({
+        query,
         courses,
         coursesNum,
         loading,
         reset,
     }: {
+        query?: string;
         courses?: Course[];
         coursesNum?: number;
         loading?: boolean;
@@ -156,6 +190,10 @@ class App extends Component<{}, AppState> {
                       courses: this.allData.courses,
                       coursesNum: this.allData.coursesNum,
                       loading: false,
+                      search: {
+                          query: "",
+                          filters: [],
+                      },
                   }
                 : {
                       courses:
@@ -167,16 +205,23 @@ class App extends Component<{}, AppState> {
                               ? state.coursesNum
                               : coursesNum,
                       loading: loading === undefined ? state.loading : loading,
+                      search: {
+                          ...state.search,
+                          query:
+                              query === undefined ? state.search.query : query,
+                      },
                   }
         );
     };
 
     filtersMenuSetState = ({
+        filters,
         courses,
         coursesNum,
         loading,
         reset,
     }: {
+        filters?: Filter[];
         courses?: Course[];
         coursesNum?: number;
         loading?: boolean;
@@ -189,8 +234,8 @@ class App extends Component<{}, AppState> {
                       coursesNum: this.allData.coursesNum,
                       loading: false,
                       search: {
-                          courses: [],
-                          coursesNum: 0,
+                          query: "",
+                          filters: [],
                       },
                   }
                 : {
@@ -201,12 +246,11 @@ class App extends Component<{}, AppState> {
                               : coursesNum,
                       loading: loading === undefined ? state.loading : loading,
                       search: {
-                          courses:
-                              courses === undefined ? state.courses : courses,
-                          coursesNum:
-                              coursesNum === undefined
-                                  ? state.coursesNum
-                                  : coursesNum,
+                          ...state.search,
+                          filters:
+                              filters === undefined
+                                  ? state.search.filters
+                                  : filters,
                       },
                   }
         );
@@ -224,7 +268,10 @@ class App extends Component<{}, AppState> {
         return (
             <div className="App flex flex-col overflow-hidden h-screen bg-gray-200">
                 <Loader loading={this.state.loading} />
-                <Search searchSetState={this.searchSetState} />
+                <Search
+                    searchSetState={this.searchSetState}
+                    filters={this.state.search.filters}
+                />
                 <CoursesNum coursesNum={this.state.coursesNum} />
                 <CourseList
                     courses={this.state.courses}
@@ -237,6 +284,19 @@ class App extends Component<{}, AppState> {
                 <FiltersMenu
                     filtersMenuIsOpen={this.state.filtersMenuIsOpen}
                     filtersMenuSetState={this.filtersMenuSetState}
+                    searchQuery={this.state.search.query}
+                    partners={this.allData.partners}
+                    skills={this.allData.skills}
+                    productDifficultyLevel={this.allData.productDifficultyLevel}
+                    language={this.allData.language}
+                    careers={this.allData.careers}
+                    entityType={this.allData.entityType}
+                    isPartOfCourseraPlus={this.allData.isPartOfCourseraPlus}
+                    subtitleLanguage={this.allData.subtitleLanguage}
+                    topic={this.allData.topic}
+                    enrollments={this.allData.enrollments}
+                    avgLearningHours={this.allData.avgLearningHours}
+                    numProductRatings={this.allData.numProductRatings}
                 />
             </div>
         );

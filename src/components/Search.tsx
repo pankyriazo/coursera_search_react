@@ -1,5 +1,5 @@
 import React, { Component, RefObject } from "react";
-import { fromEvent, Subscription, from, of } from "rxjs";
+import { fromEvent, Subscription, of } from "rxjs";
 import {
     debounceTime,
     distinctUntilChanged,
@@ -7,22 +7,26 @@ import {
     tap,
     switchMap,
 } from "rxjs/operators";
-import algoliasearch from "algoliasearch";
 import { Course } from "../types/course";
 import { SearchResponse } from "@algolia/client-search";
+import search from "../utilities/search";
+import { Filter } from "../types/filter";
 
 type SearchProps = {
     searchSetState: ({
+        query,
         courses,
         coursesNum,
         loading,
         reset,
     }: {
+        query?: string;
         courses?: Course[];
         coursesNum?: number;
         loading?: boolean;
         reset?: boolean;
     }) => void;
+    filters: Filter[];
 };
 
 class Search extends Component<SearchProps> {
@@ -45,31 +49,9 @@ class Search extends Component<SearchProps> {
                 switchMap((value: string) => {
                     if (value === "") return of(null);
 
-                    this.props.searchSetState({ loading: true });
+                    this.props.searchSetState({ query: value, loading: true });
 
-                    return from(
-                        algoliasearch(
-                            process.env.REACT_APP_ALGOLIA_APP_ID!,
-                            process.env.REACT_APP_ALGOLIA_API_KEY!
-                        )
-                            .initIndex("prod_all_products")
-                            .search(value, {
-                                restrictSearchableAttributes: [
-                                    "name",
-                                    "tagline",
-                                    "partners",
-                                    "skills",
-                                ],
-                                facets: [
-                                    "partners",
-                                    "skills",
-                                    "language",
-                                    "productDifficultyLevel",
-                                ],
-                                maxValuesPerFacet: 1000,
-                                hitsPerPage: 1000,
-                            })
-                    );
+                    return search(value, this.props.filters);
                 }),
                 tap((results: SearchResponse<unknown> | null) => {
                     if (!results) {
