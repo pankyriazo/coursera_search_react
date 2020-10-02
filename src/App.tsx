@@ -65,7 +65,7 @@ class App extends Component<{}, AppState> {
 
         this.state = {
             loading: true,
-            filtersMenuIsOpen: true,
+            filtersMenuIsOpen: false,
             courses: [],
             coursesNum: 0,
             search: {
@@ -84,6 +84,7 @@ class App extends Component<{}, AppState> {
             .pipe(
                 take(1),
                 tap((results) => {
+                    console.log(results);
                     this.allData.courses = results.hits as Course[];
                     this.allData.coursesNum = results.nbHits;
                     [
@@ -176,42 +177,22 @@ class App extends Component<{}, AppState> {
         courses,
         coursesNum,
         loading,
-        reset,
     }: {
         query?: string;
         courses?: Course[];
         coursesNum?: number;
         loading?: boolean;
-        reset?: boolean;
     }): void => {
-        this.setState((state) =>
-            reset
-                ? {
-                      courses: this.allData.courses,
-                      coursesNum: this.allData.coursesNum,
-                      loading: false,
-                      search: {
-                          query: "",
-                          filters: [],
-                      },
-                  }
-                : {
-                      courses:
-                          courses === undefined
-                              ? this.allData.courses
-                              : courses,
-                      coursesNum:
-                          coursesNum === undefined
-                              ? state.coursesNum
-                              : coursesNum,
-                      loading: loading === undefined ? state.loading : loading,
-                      search: {
-                          ...state.search,
-                          query:
-                              query === undefined ? state.search.query : query,
-                      },
-                  }
-        );
+        this.setState((state) => ({
+            courses: courses === undefined ? this.allData.courses : courses,
+            coursesNum:
+                coursesNum === undefined ? state.coursesNum : coursesNum,
+            loading: loading === undefined ? state.loading : loading,
+            search: {
+                ...state.search,
+                query: query === undefined ? state.search.query : query,
+            },
+        }));
     };
 
     filtersMenuSetState = ({
@@ -219,41 +200,22 @@ class App extends Component<{}, AppState> {
         courses,
         coursesNum,
         loading,
-        reset,
     }: {
         filters?: Filter[];
         courses?: Course[];
         coursesNum?: number;
         loading?: boolean;
-        reset?: boolean;
     }): void => {
-        this.setState((state) =>
-            reset
-                ? {
-                      courses: this.allData.courses,
-                      coursesNum: this.allData.coursesNum,
-                      loading: false,
-                      search: {
-                          query: "",
-                          filters: [],
-                      },
-                  }
-                : {
-                      courses: courses === undefined ? state.courses : courses,
-                      coursesNum:
-                          coursesNum === undefined
-                              ? state.coursesNum
-                              : coursesNum,
-                      loading: loading === undefined ? state.loading : loading,
-                      search: {
-                          ...state.search,
-                          filters:
-                              filters === undefined
-                                  ? state.search.filters
-                                  : filters,
-                      },
-                  }
-        );
+        this.setState((state) => ({
+            courses: courses === undefined ? state.courses : courses,
+            coursesNum:
+                coursesNum === undefined ? state.coursesNum : coursesNum,
+            loading: loading === undefined ? state.loading : loading,
+            search: {
+                ...state.search,
+                filters: filters === undefined ? state.search.filters : filters,
+            },
+        }));
     };
 
     toggleFiltersMenuStatus = (): void => {

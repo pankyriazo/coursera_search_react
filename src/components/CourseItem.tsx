@@ -21,7 +21,7 @@ const CourseItem = (props: CourseItemProps) => (
                 {props.course.name}
             </div>
             <div className="text-sm my-1 text-red-500 font-semibold truncate">
-                {props.course.partners.join(" | ")}
+                {props.course.partners.join(" | ") || "-"}
             </div>
             <div
                 className={

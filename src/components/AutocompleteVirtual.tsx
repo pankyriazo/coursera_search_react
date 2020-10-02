@@ -3,11 +3,19 @@ import { ListChildComponentProps, VariableSizeList } from "react-window";
 import { makeStyles } from "@material-ui/core/styles";
 import Autocomplete, {
     AutocompleteRenderGroupParams,
+    AutocompleteChangeReason,
+    AutocompleteChangeDetails,
 } from "@material-ui/lab/Autocomplete";
 import Input from "./Input";
 
 type InputAutocompleteVirtualProps = {
     data: string[];
+    onChange: (
+        event: React.ChangeEvent<{}>,
+        value: unknown,
+        reason: AutocompleteChangeReason,
+        details?: AutocompleteChangeDetails<unknown> | undefined
+    ) => void;
 };
 
 const ITEM_SIZE = 32;
@@ -98,6 +106,7 @@ const InputAutocompleteVirtual = (props: InputAutocompleteVirtualProps) => (
                 React.HTMLAttributes<HTMLElement>
             >
         }
+        onChange={props.onChange}
         renderGroup={renderGroup}
         options={props.data}
         renderInput={(params) => <Input {...params} type="text" />}

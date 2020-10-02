@@ -18,13 +18,11 @@ type SearchProps = {
         courses,
         coursesNum,
         loading,
-        reset,
     }: {
         query?: string;
         courses?: Course[];
         coursesNum?: number;
         loading?: boolean;
-        reset?: boolean;
     }) => void;
     filters: Filter[];
 };
@@ -47,24 +45,15 @@ class Search extends Component<SearchProps> {
                 debounceTime(500),
                 distinctUntilChanged(),
                 switchMap((value: string) => {
-                    if (value === "") return of(null);
-
                     this.props.searchSetState({ query: value, loading: true });
-
                     return search(value, this.props.filters);
                 }),
-                tap((results: SearchResponse<unknown> | null) => {
-                    if (!results) {
-                        this.props.searchSetState({
-                            reset: true,
-                        });
-                    } else {
-                        this.props.searchSetState({
-                            courses: results.hits as Course[],
-                            coursesNum: results.nbHits,
-                            loading: false,
-                        });
-                    }
+                tap((results: SearchResponse<unknown>) => {
+                    this.props.searchSetState({
+                        courses: results.hits as Course[],
+                        coursesNum: results.nbHits,
+                        loading: false,
+                    });
                 })
             )
             .subscribe();

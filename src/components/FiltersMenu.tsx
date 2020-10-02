@@ -1,4 +1,4 @@
-import React, { Component, RefObject } from "react";
+import React, { Component, RefObject, ChangeEvent } from "react";
 import "./FiltersMenu.scss";
 import { Course } from "../types/course";
 import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
@@ -6,25 +6,30 @@ import Slider from "./Slider";
 import Input from "./Input";
 import Autocomplete from "./Autocomplete";
 import AutocompleteVirtual from "./AutocompleteVirtual";
-import Checkbox from "./Checkbox";
 import toCamelcase from "../utilities/toCamelcase";
 import { of, Subject } from "rxjs";
-import { distinctUntilChanged, switchMap, take, tap } from "rxjs/operators";
+import {
+    distinctUntilChanged,
+    switchMap,
+    take,
+    tap,
+    debounceTime,
+} from "rxjs/operators";
 import search from "../utilities/search";
 import { Filter } from "../types/filter";
 
 type FiltersMenuProps = {
     filtersMenuIsOpen: boolean;
     filtersMenuSetState: ({
+        filters,
         courses,
         coursesNum,
         loading,
-        reset,
     }: {
+        filters?: Filter[];
         courses?: Course[];
         coursesNum?: number;
         loading?: boolean;
-        reset?: boolean;
     }) => void;
     searchQuery: string;
     partners: { name: string; courses: number }[];
@@ -69,6 +74,9 @@ const AverageRatingMarks = [
 class FiltersMenu extends Component<FiltersMenuProps, FiltersMenuState> {
     filtersMenuRef: RefObject<any>;
     averageRatingSubject$: Subject<number[]>;
+    numericInputSubject$: Subject<[string, number, string]>;
+    autocompleteInputSubject$: Subject<[string, string[]]>;
+    booleanInputSubject$: Subject<[string, boolean[]]>;
 
     constructor(props: FiltersMenuProps) {
         super(props);
@@ -83,28 +91,132 @@ class FiltersMenu extends Component<FiltersMenuProps, FiltersMenuState> {
             .pipe(
                 distinctUntilChanged(),
                 switchMap(([min, max]) => {
-                    this.setState((state) => {
-                        return {
-                            filters: state.filters
-                                .filter(
-                                    (filter) =>
-                                        filter.name !== "avgProductRating"
-                                )
-                                .concat([
-                                    {
-                                        name: "avgProductRating",
-                                        type: "numeric",
-                                        value: `avgProductRating < ${max}`,
-                                    } as Filter,
-                                    {
-                                        name: "avgProductRating",
-                                        type: "numeric",
-                                        value: `avgProductRating > ${min}`,
-                                    } as Filter,
-                                ]),
-                        };
-                    });
-                    this.update();
+                    this.setState(
+                        (state) => {
+                            return {
+                                filters: state.filters
+                                    .filter(
+                                        (filter) =>
+                                            filter.name !== "avgProductRating"
+                                    )
+                                    .concat([
+                                        {
+                                            name: "avgProductRating",
+                                            type: "numeric",
+                                            value: `avgProductRating < ${max}`,
+                                        } as Filter,
+                                        {
+                                            name: "avgProductRating",
+                                            type: "numeric",
+                                            value: `avgProductRating > ${min}`,
+                                        } as Filter,
+                                    ]),
+                            };
+                        },
+                        () => {
+                            this.update();
+                        }
+                    );
+                    return of([]);
+                })
+            )
+            .subscribe();
+
+        this.numericInputSubject$ = new Subject<[string, number, string]>();
+        this.numericInputSubject$
+            .pipe(
+                debounceTime(500),
+                distinctUntilChanged(),
+                switchMap(([name, value, operator]) => {
+                    this.setState(
+                        (state) => {
+                            return {
+                                filters: state.filters
+                                    .filter(
+                                        (filter) =>
+                                            filter.name !== name ||
+                                            (filter.name === name &&
+                                                !filter.value.includes(
+                                                    operator
+                                                ))
+                                    )
+                                    .concat(
+                                        isNaN(value)
+                                            ? []
+                                            : [
+                                                  {
+                                                      name,
+                                                      type: "numeric",
+                                                      value: `${name} ${operator} ${value}`,
+                                                  } as Filter,
+                                              ]
+                                    ),
+                            };
+                        },
+                        () => {
+                            this.update();
+                        }
+                    );
+                    return of([]);
+                })
+            )
+            .subscribe();
+
+        this.autocompleteInputSubject$ = new Subject<[string, string[]]>();
+        this.autocompleteInputSubject$
+            .pipe(
+                distinctUntilChanged(),
+                switchMap(([name, value]) => {
+                    const selectedInputsAsArray: Filter[] = value.map(
+                        (selectedInput) =>
+                            ({
+                                name,
+                                type: "categorical",
+                                value: `${name}:'${selectedInput}'`,
+                            } as Filter)
+                    );
+                    this.setState(
+                        (state) => {
+                            return {
+                                filters: state.filters
+                                    .filter((filter) => filter.name !== name)
+                                    .concat(selectedInputsAsArray),
+                            };
+                        },
+                        () => {
+                            this.update();
+                        }
+                    );
+                    return of([]);
+                })
+            )
+            .subscribe();
+
+        this.booleanInputSubject$ = new Subject<[string, boolean[]]>();
+        this.booleanInputSubject$
+            .pipe(
+                distinctUntilChanged(),
+                switchMap(([name, value]) => {
+                    const selectedInputsAsArray: Filter[] = value.map(
+                        (selectedInput) =>
+                            ({
+                                name,
+                                type: "categorical",
+                                value: `${name}:${selectedInput}`,
+                            } as Filter)
+                    );
+                    this.setState(
+                        (state) => {
+                            return {
+                                filters: state.filters
+                                    .filter((filter) => filter.name !== name)
+                                    .concat(selectedInputsAsArray),
+                            };
+                        },
+                        () => {
+                            this.update();
+                        }
+                    );
                     return of([]);
                 })
             )
@@ -119,6 +231,8 @@ class FiltersMenu extends Component<FiltersMenuProps, FiltersMenuState> {
 
     componentWillUnmount() {
         this.averageRatingSubject$.unsubscribe();
+        this.numericInputSubject$.unsubscribe();
+        this.booleanInputSubject$.unsubscribe();
     }
 
     updateAverageRating = (
@@ -126,6 +240,28 @@ class FiltersMenu extends Component<FiltersMenuProps, FiltersMenuState> {
         value: number | number[]
     ): void => {
         this.averageRatingSubject$.next(value as number[]);
+    };
+
+    updateNumericInput = (
+        name: string,
+        value: string,
+        operator: string
+    ): void => {
+        try {
+            this.numericInputSubject$.next([
+                name,
+                parseInt(value),
+                operator === "min" ? ">=" : "<=",
+            ]);
+        } catch (error) {}
+    };
+
+    updateAutocompleteInput = (name: string, value: string[]): void => {
+        this.autocompleteInputSubject$.next([name, value]);
+    };
+
+    updateBooleanInput = (name: string, value: boolean[]): void => {
+        this.booleanInputSubject$.next([name, value]);
     };
 
     update = (): void => {
@@ -138,6 +274,7 @@ class FiltersMenu extends Component<FiltersMenuProps, FiltersMenuState> {
                         courses: results.hits as Course[],
                         coursesNum: results.nbHits,
                         loading: false,
+                        filters: this.state.filters,
                     });
                 })
             )
@@ -189,6 +326,13 @@ class FiltersMenu extends Component<FiltersMenuProps, FiltersMenuState> {
                     </div>
                     <div className="inputs flex align-center justify-center">
                         <Input
+                            onChange={(e) =>
+                                this.updateNumericInput(
+                                    "numProductRatings",
+                                    e.target.value,
+                                    "min"
+                                )
+                            }
                             placeholder={`Min (${this.props.numProductRatings.min})`}
                             type="tel"
                         />
@@ -196,6 +340,13 @@ class FiltersMenu extends Component<FiltersMenuProps, FiltersMenuState> {
                             /
                         </span>
                         <Input
+                            onChange={(e) =>
+                                this.updateNumericInput(
+                                    "numProductRatings",
+                                    e.target.value,
+                                    "max"
+                                )
+                            }
                             placeholder={`Max (${this.props.numProductRatings.max})`}
                             type="tel"
                         />
@@ -207,6 +358,13 @@ class FiltersMenu extends Component<FiltersMenuProps, FiltersMenuState> {
                     </div>
                     <div className="inputs flex align-center justify-center">
                         <Input
+                            onChange={(e) =>
+                                this.updateNumericInput(
+                                    "enrollments",
+                                    e.target.value,
+                                    "min"
+                                )
+                            }
                             placeholder={`Min (${this.props.enrollments.min})`}
                             type="tel"
                         />
@@ -214,6 +372,13 @@ class FiltersMenu extends Component<FiltersMenuProps, FiltersMenuState> {
                             /
                         </span>
                         <Input
+                            onChange={(e) =>
+                                this.updateNumericInput(
+                                    "enrollments",
+                                    e.target.value,
+                                    "max"
+                                )
+                            }
                             placeholder={`Max (${this.props.enrollments.max})`}
                             type="tel"
                         />
@@ -225,6 +390,13 @@ class FiltersMenu extends Component<FiltersMenuProps, FiltersMenuState> {
                     </div>
                     <div className="inputs flex align-center justify-center">
                         <Input
+                            onChange={(e) =>
+                                this.updateNumericInput(
+                                    "avgLearningHours",
+                                    e.target.value,
+                                    "min"
+                                )
+                            }
                             placeholder={`Min (${this.props.avgLearningHours.min})`}
                             type="tel"
                         />
@@ -232,6 +404,13 @@ class FiltersMenu extends Component<FiltersMenuProps, FiltersMenuState> {
                             /
                         </span>
                         <Input
+                            onChange={(e) =>
+                                this.updateNumericInput(
+                                    "avgLearningHours",
+                                    e.target.value,
+                                    "max"
+                                )
+                            }
                             placeholder={`Max (${this.props.avgLearningHours.max})`}
                             type="tel"
                         />
@@ -241,6 +420,12 @@ class FiltersMenu extends Component<FiltersMenuProps, FiltersMenuState> {
                     <div className="label text-xs text-gray-600">Language</div>
                     <Autocomplete
                         multiple
+                        onChange={(event, value, reason) => {
+                            this.updateAutocompleteInput(
+                                "language",
+                                value as string[]
+                            );
+                        }}
                         options={this.props.language
                             .map((language) => language.name)
                             .sort()}
@@ -257,6 +442,12 @@ class FiltersMenu extends Component<FiltersMenuProps, FiltersMenuState> {
                     </div>
                     <Autocomplete
                         multiple
+                        onChange={(event, value, reason) => {
+                            this.updateAutocompleteInput(
+                                "productDifficultyLevel",
+                                value as string[]
+                            );
+                        }}
                         options={this.props.productDifficultyLevel
                             .map(
                                 (productDifficultyLevel) =>
@@ -274,6 +465,12 @@ class FiltersMenu extends Component<FiltersMenuProps, FiltersMenuState> {
                     <div className="label text-xs text-gray-600">Type</div>
                     <Autocomplete
                         multiple
+                        onChange={(event, value, reason) => {
+                            this.updateAutocompleteInput(
+                                "entityType",
+                                value as string[]
+                            );
+                        }}
                         options={this.props.entityType
                             .map((type) => toCamelcase(type.name))
                             .sort()}
@@ -287,6 +484,12 @@ class FiltersMenu extends Component<FiltersMenuProps, FiltersMenuState> {
                 <div className="input_group mt-8">
                     <div className="label text-xs text-gray-600">Partners</div>
                     <AutocompleteVirtual
+                        onChange={(event, value, reason) => {
+                            this.updateAutocompleteInput(
+                                "partners",
+                                value as string[]
+                            );
+                        }}
                         data={this.props.partners
                             .map((partner) => partner.name)
                             .sort()}
@@ -295,6 +498,12 @@ class FiltersMenu extends Component<FiltersMenuProps, FiltersMenuState> {
                 <div className="input_group mt-8">
                     <div className="label text-xs text-gray-600">Skills</div>
                     <AutocompleteVirtual
+                        onChange={(event, value, reason) => {
+                            this.updateAutocompleteInput(
+                                "skills",
+                                value as string[]
+                            );
+                        }}
                         data={this.props.skills
                             .map((skill) => skill.name)
                             .sort()}
@@ -303,6 +512,12 @@ class FiltersMenu extends Component<FiltersMenuProps, FiltersMenuState> {
                 <div className="input_group mt-8">
                     <div className="label text-xs text-gray-600">Careers</div>
                     <AutocompleteVirtual
+                        onChange={(event, value, reason) => {
+                            this.updateAutocompleteInput(
+                                "careers",
+                                value as string[]
+                            );
+                        }}
                         data={this.props.careers
                             .map((career) => career.name)
                             .sort()}
@@ -313,15 +528,37 @@ class FiltersMenu extends Component<FiltersMenuProps, FiltersMenuState> {
                         Subtitle Language
                     </div>
                     <AutocompleteVirtual
+                        onChange={(event, value, reason) => {
+                            this.updateAutocompleteInput(
+                                "subtitleLanguage",
+                                value as string[]
+                            );
+                        }}
                         data={this.props.subtitleLanguage
                             .map((subtitleLanguage) => subtitleLanguage.name)
                             .sort()}
                     />
                 </div>
                 <div className="input_group mt-8">
-                    <Checkbox
-                        label="Is part of Coursera Plus"
-                        labelPlacement="start"
+                    <div className="label text-xs text-gray-600">
+                        Is part of Coursera Plus
+                    </div>
+                    <Autocomplete
+                        multiple
+                        onChange={(event, value, reason) => {
+                            this.updateBooleanInput(
+                                "isPartOfCourseraPlus",
+                                (value as string[]).map(
+                                    (value) => value === "Yes"
+                                )
+                            );
+                        }}
+                        options={["Yes", "No"]}
+                        renderInput={(params) => (
+                            <div className="input w-full">
+                                <Input {...params} type="text" />
+                            </div>
+                        )}
                     />
                 </div>
             </div>

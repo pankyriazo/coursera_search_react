@@ -8,6 +8,9 @@ const search = (
     filters: Filter[],
     facets?: string[]
 ): Observable<SearchResponse<unknown>> => {
+    console.log(query);
+    console.log(filters);
+
     return from(
         algoliasearch(
             process.env.REACT_APP_ALGOLIA_APP_ID!,
@@ -18,18 +21,30 @@ const search = (
                 facets: facets || [],
                 filters: filters
                     .filter((filter) => filter.type === "categorical")
+                    .reduce((categorizedFilters, currentFilter) => {
+                        const currentFilterCategory = categorizedFilters.find(
+                            (filter) => filter.name === currentFilter.name
+                        );
+                        if (!currentFilterCategory)
+                            categorizedFilters.push({
+                                name: currentFilter.name,
+                                type: currentFilter.type,
+                                values: [currentFilter.value],
+                            });
+                        else
+                            currentFilterCategory.values.push(
+                                currentFilter.value
+                            );
+
+                        return categorizedFilters;
+                    }, [] as { name: string; type: "categorical" | "numeric"; values: string[] }[])
                     .map(
-                        (filter, index) =>
-                            `${filter.name}:${filter.value}${
-                                index > 0 ? " OR" : ""
-                            }`
+                        (filterCategory) =>
+                            `(${filterCategory.values.join(" OR ")})`
                     )
-                    .join(" "),
+                    .join(" AND "),
                 numericFilters: filters
                     .filter((filter) => filter.type === "numeric")
-                    .map((filter) => filter.value),
-                tagFilters: filters
-                    .filter((filter) => filter.type === "tag")
                     .map((filter) => filter.value),
                 maxValuesPerFacet: 1000,
                 hitsPerPage: 1000,
