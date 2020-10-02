@@ -78,7 +78,7 @@
         "prestart": "npm run build:tailwind",
         "prebuild": "npm run build:tailwind",
         "start": "node scripts/start.js",
-        "build": "PUBLIC_URL=http://pkyriazo.github.io/coursera_search_react node scripts/build.js",
+        "build": "PUBLIC_URL=https://pkyriazo.github.io/coursera_search_react node scripts/build.js",
         "test": "node scripts/test.js"
     },
     "eslintConfig": {
