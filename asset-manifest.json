@@ -1,22 +1,22 @@
 {
   "files": {
-    "main.css": "https://pkyriazo.github.io/coursera_search_react/static/css/main.a65ecdf3.chunk.css",
-    "main.js": "https://pkyriazo.github.io/coursera_search_react/static/js/main.5ae42fed.chunk.js",
-    "main.js.map": "https://pkyriazo.github.io/coursera_search_react/static/js/main.5ae42fed.chunk.js.map",
+    "main.css": "https://pkyriazo.github.io/coursera_search_react/static/css/main.f6129990.chunk.css",
+    "main.js": "https://pkyriazo.github.io/coursera_search_react/static/js/main.4e13379f.chunk.js",
+    "main.js.map": "https://pkyriazo.github.io/coursera_search_react/static/js/main.4e13379f.chunk.js.map",
     "runtime-main.js": "https://pkyriazo.github.io/coursera_search_react/static/js/runtime-main.2494889e.js",
     "runtime-main.js.map": "https://pkyriazo.github.io/coursera_search_react/static/js/runtime-main.2494889e.js.map",
-    "static/js/2.bcd57354.chunk.js": "https://pkyriazo.github.io/coursera_search_react/static/js/2.bcd57354.chunk.js",
-    "static/js/2.bcd57354.chunk.js.map": "https://pkyriazo.github.io/coursera_search_react/static/js/2.bcd57354.chunk.js.map",
+    "static/js/2.20a9a745.chunk.js": "https://pkyriazo.github.io/coursera_search_react/static/js/2.20a9a745.chunk.js",
+    "static/js/2.20a9a745.chunk.js.map": "https://pkyriazo.github.io/coursera_search_react/static/js/2.20a9a745.chunk.js.map",
     "index.html": "https://pkyriazo.github.io/coursera_search_react/index.html",
-    "precache-manifest.061ddaf4f6e0429fdfc85009ca43488d.js": "https://pkyriazo.github.io/coursera_search_react/precache-manifest.061ddaf4f6e0429fdfc85009ca43488d.js",
+    "precache-manifest.455d2a24f50ca34e750cb31c4b84bc13.js": "https://pkyriazo.github.io/coursera_search_react/precache-manifest.455d2a24f50ca34e750cb31c4b84bc13.js",
     "service-worker.js": "https://pkyriazo.github.io/coursera_search_react/service-worker.js",
-    "static/css/main.a65ecdf3.chunk.css.map": "https://pkyriazo.github.io/coursera_search_react/static/css/main.a65ecdf3.chunk.css.map",
-    "static/js/2.bcd57354.chunk.js.LICENSE.txt": "https://pkyriazo.github.io/coursera_search_react/static/js/2.bcd57354.chunk.js.LICENSE.txt"
+    "static/css/main.f6129990.chunk.css.map": "https://pkyriazo.github.io/coursera_search_react/static/css/main.f6129990.chunk.css.map",
+    "static/js/2.20a9a745.chunk.js.LICENSE.txt": "https://pkyriazo.github.io/coursera_search_react/static/js/2.20a9a745.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.2494889e.js",
-    "static/js/2.bcd57354.chunk.js",
-    "static/css/main.a65ecdf3.chunk.css",
-    "static/js/main.5ae42fed.chunk.js"
+    "static/js/2.20a9a745.chunk.js",
+    "static/css/main.f6129990.chunk.css",
+    "static/js/main.4e13379f.chunk.js"
   ]
 }

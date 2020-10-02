@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "https://pkyriazo.github.io/coursera_search_react/precache-manifest.061ddaf4f6e0429fdfc85009ca43488d.js"
+  "https://pkyriazo.github.io/coursera_search_react/precache-manifest.455d2a24f50ca34e750cb31c4b84bc13.js"
 );
 
 self.addEventListener('message', (event) => {
