@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "http://pkyriazo.github.io/coursera_search_react/static/css/main.a65ecdf3.chunk.css",
+    "main.js": "http://pkyriazo.github.io/coursera_search_react/static/js/main.c1083d5d.chunk.js",
+    "main.js.map": "http://pkyriazo.github.io/coursera_search_react/static/js/main.c1083d5d.chunk.js.map",
+    "runtime-main.js": "http://pkyriazo.github.io/coursera_search_react/static/js/runtime-main.69972a77.js",
+    "runtime-main.js.map": "http://pkyriazo.github.io/coursera_search_react/static/js/runtime-main.69972a77.js.map",
+    "static/js/2.bcd57354.chunk.js": "http://pkyriazo.github.io/coursera_search_react/static/js/2.bcd57354.chunk.js",
+    "static/js/2.bcd57354.chunk.js.map": "http://pkyriazo.github.io/coursera_search_react/static/js/2.bcd57354.chunk.js.map",
+    "index.html": "http://pkyriazo.github.io/coursera_search_react/index.html",
+    "precache-manifest.bf971c9b126dd5b9ba572e53ec1a0301.js": "http://pkyriazo.github.io/coursera_search_react/precache-manifest.bf971c9b126dd5b9ba572e53ec1a0301.js",
+    "service-worker.js": "http://pkyriazo.github.io/coursera_search_react/service-worker.js",
+    "static/css/main.a65ecdf3.chunk.css.map": "http://pkyriazo.github.io/coursera_search_react/static/css/main.a65ecdf3.chunk.css.map",
+    "static/js/2.bcd57354.chunk.js.LICENSE.txt": "http://pkyriazo.github.io/coursera_search_react/static/js/2.bcd57354.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.69972a77.js",
+    "static/js/2.bcd57354.chunk.js",
+    "static/css/main.a65ecdf3.chunk.css",
+    "static/js/main.c1083d5d.chunk.js"
+  ]
+}
