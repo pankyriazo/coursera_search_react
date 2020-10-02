@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "3f82d71ca6a8fead27199307e08672ee",
+    "revision": "11c4eeb7eeb5ac4402c268ed14ae2ea8",
     "url": "https://pkyriazo.github.io/coursera_search_react/index.html"
   },
   {
-    "revision": "875e7ab7fc9d5b8efc54",
+    "revision": "27fb3421306584c2947e",
     "url": "https://pkyriazo.github.io/coursera_search_react/static/css/main.a65ecdf3.chunk.css"
   },
   {
@@ -16,8 +16,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "https://pkyriazo.github.io/coursera_search_react/static/js/2.bcd57354.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "875e7ab7fc9d5b8efc54",
-    "url": "https://pkyriazo.github.io/coursera_search_react/static/js/main.2b95a541.chunk.js"
+    "revision": "27fb3421306584c2947e",
+    "url": "https://pkyriazo.github.io/coursera_search_react/static/js/main.5ae42fed.chunk.js"
   },
   {
     "revision": "053ffc93ce4cc6e537e8",
