@@ -99,18 +99,22 @@ class FiltersMenu extends Component<FiltersMenuProps, FiltersMenuState> {
                                         (filter) =>
                                             filter.name !== "avgProductRating"
                                     )
-                                    .concat([
-                                        {
-                                            name: "avgProductRating",
-                                            type: "numeric",
-                                            value: `avgProductRating < ${max}`,
-                                        } as Filter,
-                                        {
-                                            name: "avgProductRating",
-                                            type: "numeric",
-                                            value: `avgProductRating > ${min}`,
-                                        } as Filter,
-                                    ]),
+                                    .concat(
+                                        min === 0 && max === 5
+                                            ? []
+                                            : [
+                                                  {
+                                                      name: "avgProductRating",
+                                                      type: "numeric",
+                                                      value: `avgProductRating < ${max}`,
+                                                  } as Filter,
+                                                  {
+                                                      name: "avgProductRating",
+                                                      type: "numeric",
+                                                      value: `avgProductRating > ${min}`,
+                                                  } as Filter,
+                                              ]
+                                    ),
                             };
                         },
                         () => {
@@ -287,7 +291,7 @@ class FiltersMenu extends Component<FiltersMenuProps, FiltersMenuState> {
                 ref={this.filtersMenuRef}
                 className={
                     (this.props.filtersMenuIsOpen ? "open " : "") +
-                    "filters_menu fixed bottom-0 left-0 w-full z-10 bg-white p-4 overflow-y-auto pb-32 flex flex-col shadow-lg"
+                    "filters_menu fixed bottom-0 left-0 w-full z-10 bg-white p-4 overflow-y-auto pb-32 flex flex-col shadow lg:inset-auto lg:w-full lg:p-6 lg:relative lg:mt-4 lg:rounded lg:border-4"
                 }
             >
                 <div className="input_group">

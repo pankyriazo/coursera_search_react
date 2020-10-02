@@ -1,5 +1,5 @@
 import React, { Component, RefObject } from "react";
-import { fromEvent, Subscription, of } from "rxjs";
+import { fromEvent, Subscription } from "rxjs";
 import {
     debounceTime,
     distinctUntilChanged,
@@ -11,6 +11,7 @@ import { Course } from "../types/course";
 import { SearchResponse } from "@algolia/client-search";
 import search from "../utilities/search";
 import { Filter } from "../types/filter";
+import "./Search.scss";
 
 type SearchProps = {
     searchSetState: ({
@@ -65,7 +66,7 @@ class Search extends Component<SearchProps> {
 
     render() {
         return (
-            <div className="search w-full p-2 bg-blue-500 z-30">
+            <div className="search w-full p-2 bg-blue-500 z-30 lg:bg-transparent lg:p-0 lg:border-4 lg:rounded">
                 <input
                     ref={this.inputRef}
                     type="text"

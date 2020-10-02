@@ -11,4 +11,12 @@
         transform: translateY(0) scale(1);
         transition: transform 0.15s ease-in-out, opacity 0.1s ease-in-out;
     }
+
+    @media (min-width: 1024px) {
+        height: calc(100vh - 16rem);
+        max-height: 60.875rem;
+        visibility: visible;
+        opacity: 1;
+        transform: none;
+    }
 }

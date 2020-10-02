@@ -26,8 +26,8 @@ class CourseList extends Component<CourseListsProps> {
             <AutoSizer>
                 {({ height, width }) => (
                     <List
-                        className="List overflow-y-auto pb-20 z-0"
-                        height={height - (56 + 26)}
+                        className="List pb-20 lg:pb-0"
+                        height={height - (window.innerWidth < 1024 ? 82 : 180)}
                         itemCount={this.props.coursesNum}
                         itemSize={106}
                         width={width}

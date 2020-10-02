@@ -15,12 +15,12 @@ const CourseItem = (props: CourseItemProps) => (
             title={props.course.name}
             target="_blank"
             rel="noopener noreferrer"
-            className="block p-3 bg-white shadow rounded"
+            className="block p-3 bg-white shadow rounded border-2 border-transparent z-0 hover:bg-indigo-100 hover:border-indigo-200"
         >
             <div className="text-lg font-semibold text-black truncate">
                 {props.course.name}
             </div>
-            <div className="text-sm my-1 text-red-500 font-semibold truncate">
+            <div className="text-xs my-1 text-red-600 font-medium truncate">
                 {props.course.partners.join(" | ") || "-"}
             </div>
             <div

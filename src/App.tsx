@@ -11,6 +11,7 @@ import CoursesNum from "./components/CoursesNum";
 import { tap, take } from "rxjs/operators";
 import { Filter } from "./types/filter";
 import { of } from "rxjs";
+import Logo from "./components/Logo";
 
 type AllData = {
     courses: Course[];
@@ -84,7 +85,6 @@ class App extends Component<{}, AppState> {
             .pipe(
                 take(1),
                 tap((results) => {
-                    console.log(results);
                     this.allData.courses = results.hits as Course[];
                     this.allData.coursesNum = results.nbHits;
                     [
@@ -230,36 +230,53 @@ class App extends Component<{}, AppState> {
         return (
             <div className="App flex flex-col overflow-hidden h-screen bg-gray-200">
                 <Loader loading={this.state.loading} />
-                <Search
-                    searchSetState={this.searchSetState}
-                    filters={this.state.search.filters}
-                />
-                <CoursesNum coursesNum={this.state.coursesNum} />
-                <CourseList
-                    courses={this.state.courses}
-                    coursesNum={this.state.coursesNum}
-                />
                 <FiltersButton
                     filtersMenuIsOpen={this.state.filtersMenuIsOpen}
                     toggleFiltersMenuStatus={this.toggleFiltersMenuStatus}
                 />
-                <FiltersMenu
-                    filtersMenuIsOpen={this.state.filtersMenuIsOpen}
-                    filtersMenuSetState={this.filtersMenuSetState}
-                    searchQuery={this.state.search.query}
-                    partners={this.allData.partners}
-                    skills={this.allData.skills}
-                    productDifficultyLevel={this.allData.productDifficultyLevel}
-                    language={this.allData.language}
-                    careers={this.allData.careers}
-                    entityType={this.allData.entityType}
-                    isPartOfCourseraPlus={this.allData.isPartOfCourseraPlus}
-                    subtitleLanguage={this.allData.subtitleLanguage}
-                    topic={this.allData.topic}
-                    enrollments={this.allData.enrollments}
-                    avgLearningHours={this.allData.avgLearningHours}
-                    numProductRatings={this.allData.numProductRatings}
-                />
+                <div className="relative lg:container lg:mx-auto">
+                    <div className="select-none lg:mt-6 lg:mb-4">
+                        <Logo />
+                        <CoursesNum coursesNum={this.state.coursesNum} />
+                    </div>
+                    <div className="lg:flex lg:h-full">
+                        <div className="lg:w-1/3 lg:mr-4 lg:flex lg:flex-col lg:relative lg:overflow-y-auto">
+                            <Search
+                                searchSetState={this.searchSetState}
+                                filters={this.state.search.filters}
+                            />
+                            <FiltersMenu
+                                filtersMenuIsOpen={this.state.filtersMenuIsOpen}
+                                filtersMenuSetState={this.filtersMenuSetState}
+                                searchQuery={this.state.search.query}
+                                partners={this.allData.partners}
+                                skills={this.allData.skills}
+                                productDifficultyLevel={
+                                    this.allData.productDifficultyLevel
+                                }
+                                language={this.allData.language}
+                                careers={this.allData.careers}
+                                entityType={this.allData.entityType}
+                                isPartOfCourseraPlus={
+                                    this.allData.isPartOfCourseraPlus
+                                }
+                                subtitleLanguage={this.allData.subtitleLanguage}
+                                topic={this.allData.topic}
+                                enrollments={this.allData.enrollments}
+                                avgLearningHours={this.allData.avgLearningHours}
+                                numProductRatings={
+                                    this.allData.numProductRatings
+                                }
+                            />
+                        </div>
+                        <div className="h-screen lg:w-2/3">
+                            <CourseList
+                                courses={this.state.courses}
+                                coursesNum={this.state.coursesNum}
+                            />
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }

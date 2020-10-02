@@ -8,9 +8,6 @@ const search = (
     filters: Filter[],
     facets?: string[]
 ): Observable<SearchResponse<unknown>> => {
-    console.log(query);
-    console.log(filters);
-
     return from(
         algoliasearch(
             process.env.REACT_APP_ALGOLIA_APP_ID!,
